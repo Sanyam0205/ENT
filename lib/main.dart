@@ -1,8 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io'; // Add this import statement
+import 'package:image_picker/image_picker.dart'; // Import for ImagePicker
+import 'package:file_picker/file_picker.dart'; // Import for FilePicker
 
 void main() {
   runApp(MyApp());
@@ -32,8 +33,15 @@ class _ChatbotUIState extends State<ChatbotUI> {
   bool focusEnabled = false;
   String selectedFile = '';
   List<Map<String, String>> chatMessages = []; // Chat messages
+  String sessionId = ''; // Add sessionId for handling chat sessions
 
   TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _startNewChatSession(); // Initialize with a new chat session
+  }
 
   // This method sends the query to the Python backend and fetches the response
   Future<void> _sendChatQuery(String query) async {
@@ -41,8 +49,7 @@ class _ChatbotUIState extends State<ChatbotUI> {
       chatMessages.add({'sender': 'user', 'message': query});
     });
 
-    // Replace with your Python backend URL
-    final String apiUrl = "http://127.0.0.1:5000/chatbot";
+    final String apiUrl = "http://10.0.2.2:5000/ask";
 
     try {
       final response = await http.post(
@@ -50,7 +57,7 @@ class _ChatbotUIState extends State<ChatbotUI> {
         headers: {
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"query": query}),
+        body: jsonEncode({"question": query}),
       );
 
       if (response.statusCode == 200) {
@@ -78,10 +85,113 @@ class _ChatbotUIState extends State<ChatbotUI> {
     }
   }
 
-  // This method handles file attachment
   Future<void> _pickFile() async {
-    // File picking logic here
-    // Example: Using file_picker package to choose a file
+    try {
+      // Show a bottom sheet with options
+      final option = await showModalBottomSheet<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Take a photo'),
+                onTap: () => Navigator.pop(context, 'camera'),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Choose from gallery'),
+                onTap: () => Navigator.pop(context, 'gallery'),
+              ),
+              ListTile(
+                leading: Icon(Icons.file_copy),
+                title: Text('Choose a file'),
+                onTap: () => Navigator.pop(context, 'file'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (option == null) return;
+
+      File? file;
+      final picker = ImagePicker();
+
+      switch (option) {
+        case 'camera':
+          final pickedFile = await picker.pickImage(source: ImageSource.camera);
+          if (pickedFile != null) file = File(pickedFile.path);
+          break;
+        case 'gallery':
+          final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+          if (pickedFile != null) file = File(pickedFile.path);
+          break;
+        case 'file':
+          final pickedFile = await FilePicker.platform.pickFiles(type: FileType.image);
+          if (pickedFile != null) file = File(pickedFile.files.single.path!);
+          break;
+      }
+
+      if (file != null) {
+        // Send the file to the Flask API
+        await _uploadFile(file);
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    }
+  }
+
+  Future<void> _uploadFile(File file) async {
+    final String apiUrl = "http://10.0.2.2:5000/ocr"; // Update to your API endpoint
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+        ..files.add(await http.MultipartFile.fromPath('file', file.path));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = jsonDecode(responseBody);
+        String ocrText = jsonResponse['text'];
+
+        setState(() {
+          chatMessages.add({'sender': 'bot', 'message': ocrText});
+        });
+      } else {
+        setState(() {
+          chatMessages.add({
+            'sender': 'bot',
+            'message': 'Error: Unable to fetch response from server.'
+          });
+        });
+      }
+    } catch (e) {
+      setState(() {
+        chatMessages.add({
+          'sender': 'bot',
+          'message': 'Error: Failed to connect to the server.'
+        });
+      });
+    }
+  }
+
+
+  // Method to clear the chat
+  void _clearChat() {
+    setState(() {
+      chatMessages.clear(); // Clear all chat messages
+    });
+  }
+
+  // Method to start a new chat session
+  void _startNewChatSession() {
+    setState(() {
+      chatMessages.clear(); // Clear chat messages
+      sessionId = DateTime.now().millisecondsSinceEpoch.toString(); // Create a new session ID
+    });
   }
 
   @override
@@ -95,6 +205,14 @@ class _ChatbotUIState extends State<ChatbotUI> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.add), // New Chat button (+)
+            onPressed: _startNewChatSession, // Starts a new chat session
+          ),
+          IconButton(
+            icon: Icon(Icons.clear), // Clear Chat button
+            onPressed: _clearChat, // Clears the chat
+          ),
           IconButton(
             icon: Icon(Icons.person),
             onPressed: () {},
@@ -139,7 +257,7 @@ class _ChatbotUIState extends State<ChatbotUI> {
               child: TextField(
                 controller: searchController,
                 onSubmitted:
-                    _sendChatQuery, // Sends the query when pressed "Enter"
+                _sendChatQuery, // Sends the query when pressed "Enter"
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey[850],
@@ -189,7 +307,7 @@ class _ChatbotUIState extends State<ChatbotUI> {
                   bool isUser = chat['sender'] == 'user';
                   return Align(
                     alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       margin: EdgeInsets.symmetric(vertical: 5),
                       padding: EdgeInsets.all(10),
