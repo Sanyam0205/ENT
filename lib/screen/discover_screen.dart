@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -51,22 +50,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         setState(() {
           searchResults.add({'sender': 'bot', 'message': botResponse});
         });
-      } else {
-        setState(() {
-          searchResults.add({
-            'sender': 'bot',
-            'message': 'Error: Unable to fetch response from server.'
-          });
-        });
-      }
-    } catch (e) {
-      setState(() {
-        searchResults.add({
-          'sender': 'bot',
-          'message': 'Error: Failed to connect to the server.'
-        });
-      });
-    }
+      } else {}
+    } catch (e) {}
   }
 
   Future<void> _pickFile() async {
@@ -108,11 +93,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           if (pickedFile != null) file = File(pickedFile.path);
           break;
         case 'gallery':
-          final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+          final pickedFile =
+              await picker.pickImage(source: ImageSource.gallery);
           if (pickedFile != null) file = File(pickedFile.path);
           break;
         case 'file':
-          final pickedFile = await FilePicker.platform.pickFiles(type: FileType.image);
+          final pickedFile =
+              await FilePicker.platform.pickFiles(type: FileType.image);
           if (pickedFile != null) file = File(pickedFile.files.single.path!);
           break;
       }
@@ -130,7 +117,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   Future<void> _uploadFile(File file) async {
-    final String apiUrl = "http://10.0.2.2:5000/ocr"; // Update to your API endpoint
+    final String apiUrl =
+        "http://10.0.2.2:5000/ocr"; // Update to your API endpoint
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse(apiUrl))
@@ -154,19 +142,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           });
         });
       }
-    } catch (e) {
-      setState(() {
-        searchResults.add({
-          'sender': 'bot',
-          'message': 'Error: Failed to connect to the server.'
-        });
-      });
-    }
+    } catch (e) {}
   }
 
   Future<void> _saveChatHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> chatStrings = searchResults.map((chat) => jsonEncode(chat)).toList();
+    List<String> chatStrings =
+        searchResults.map((chat) => jsonEncode(chat)).toList();
     await prefs.setStringList('chatHistory', chatStrings);
   }
 
@@ -203,7 +185,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 final chat = searchResults[index];
                 bool isUser = chat['sender'] == 'user';
                 return Align(
-                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment:
+                      isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: EdgeInsets.symmetric(vertical: 5),
                     padding: EdgeInsets.all(10),
@@ -211,12 +194,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       color: isUser ? Colors.blue : Colors.grey[850],
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: chat['message'] == '[Image uploaded]' && _image != null
-                        ? Image.file(_image!)
-                        : Text(
-                            chat['message']!,
-                            style: TextStyle(color: Colors.white),
-                          ),
+                    child:
+                        chat['message'] == '[Image uploaded]' && _image != null
+                            ? Image.file(_image!)
+                            : Text(
+                                chat['message']!,
+                                style: TextStyle(color: Colors.white),
+                              ),
                   ),
                 );
               },
@@ -268,7 +252,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
-          BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Library'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.library_books), label: 'Library'),
         ],
         onTap: (index) {
           if (index == 0) {
