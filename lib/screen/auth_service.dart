@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthScreen extends StatefulWidget {
   @override
@@ -18,6 +19,14 @@ class _AuthScreenState extends State<AuthScreen> {
       if (isSignUp) {
         userCredential = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
+           // Store user data in Firestore after sign-up
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'email': email,
+        'createdAt': Timestamp.now(),
+         });
       } else {
         userCredential = await _auth.signInWithEmailAndPassword(
             email: email, password: password);
