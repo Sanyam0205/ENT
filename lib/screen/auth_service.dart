@@ -19,21 +19,21 @@ class _AuthScreenState extends State<AuthScreen> {
       if (isSignUp) {
         userCredential = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
-           // Store user data in Firestore after sign-up
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
-        'email': email,
-        'createdAt': Timestamp.now(),
-         });
+      //      // Store user data in Firestore after sign-up
+      // await FirebaseFirestore.instance
+      //     .collection('users')
+      //     .doc(userCredential.user!.uid)
+      //     .set({
+      //   'email': email,
+      //   'createdAt': Timestamp.now(),
+      //    });
       } else {
         userCredential = await _auth.signInWithEmailAndPassword(
             email: email, password: password);
       }
 
       if (userCredential.user != null) {
-        Navigator.of(context).pushReplacementNamed('/chat');
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
       print(e);
