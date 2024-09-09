@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "463545658781",
+    "project_id": "mokshayani-8e034",
+    "storage_bucket": "mokshayani-8e034.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463545658781:android:f0c65bea805ac6145f5374",
+        "android_client_info": {
+          "package_name": "com.example.mokshayani"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN7DNxdy2VdnEM45B7bbDB2D_6beDcMX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
