@@ -1,566 +1,3 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:image_picker/image_picker.dart';
-// // import 'dart:io';
-// // import 'package:http/http.dart' as http;
-// // import 'dart:convert';
-
-// // class DiscoverScreen extends StatefulWidget {
-// //   @override
-// //   _DiscoverScreenState createState() => _DiscoverScreenState();
-// // }
-
-// // class _DiscoverScreenState extends State<DiscoverScreen> {
-// //   TextEditingController searchController = TextEditingController();
-// //   List<Map<String, String>> searchResults = [];
-// //   File? _image;
-
-// //   Future<void> _sendSearchQuery(String query) async {
-// //     setState(() {
-// //       searchResults.add({'sender': 'user', 'message': query});
-// //     });
-
-// //     final String apiUrl = "http://10.0.2.2:5000/ask";
-
-// //     try {
-// //       final response = await http.post(
-// //         Uri.parse(apiUrl),
-// //         headers: {"Content-Type": "application/json"},
-// //         body: jsonEncode({"question": query}),
-// //       );
-
-// //       if (response.statusCode == 200) {
-// //         final jsonResponse = jsonDecode(response.body);
-// //         String botResponse = jsonResponse['response'];
-
-// //         setState(() {
-// //           searchResults.add({'sender': 'bot', 'message': botResponse});
-// //         });
-// //       } else {
-// //         setState(() {
-// //           searchResults.add({
-// //             'sender': 'bot',
-// //             'message': 'Error: Unable to fetch response from server.'
-// //           });
-// //         });
-// //       }
-// //     } catch (e) {
-// //       setState(() {
-// //         searchResults.add({
-// //           'sender': 'bot',
-// //           'message': 'Error: Failed to connect to the server.'
-// //         });
-// //       });
-// //     }
-// //   }
-
-// //   Future<void> _pickImage() async {
-// //     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-// //     if (pickedFile != null) {
-// //       setState(() {
-// //         _image = File(pickedFile.path);
-// //         searchResults.add({'sender': 'user', 'message': '[Image uploaded]'});
-// //       });
-// //     }
-// //   }
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return Scaffold(
-// //       appBar: AppBar(
-// //         title: Text('Search'),
-// //       ),
-// //       body: Column(
-// //         children: [
-// //           Expanded(
-// //             child: ListView.builder(
-// //               itemCount: searchResults.length,
-// //               itemBuilder: (context, index) {
-// //                 final chat = searchResults[index];
-// //                 bool isUser = chat['sender'] == 'user';
-// //                 return Align(
-// //                   alignment: isUser
-// //                       ? Alignment.centerRight
-// //                       : Alignment.centerLeft,
-// //                   child: Container(
-// //                     margin: EdgeInsets.symmetric(vertical: 5),
-// //                     padding: EdgeInsets.all(10),
-// //                     decoration: BoxDecoration(
-// //                       color: isUser ? Colors.blue : Colors.grey[850],
-// //                       borderRadius: BorderRadius.circular(10),
-// //                     ),
-// //                     child: chat['message'] == '[Image uploaded]' && _image != null
-// //                         ? Image.file(_image!)
-// //                         : Text(
-// //                             chat['message']!,
-// //                             style: TextStyle(color: Colors.white),
-// //                           ),
-// //                   ),
-// //                 );
-// //               },
-// //             ),
-// //           ),
-// //           Padding(
-// //             padding: const EdgeInsets.all(8.0),
-// //             child: Row(
-// //               children: [
-// //                 IconButton(
-// //                   icon: Icon(Icons.image, color: Colors.white),
-// //                   onPressed: _pickImage,
-// //                 ),
-// //                 Expanded(
-// //                   child: TextField(
-// //                     controller: searchController,
-// //                     decoration: InputDecoration(
-// //                       filled: true,
-// //                       fillColor: Colors.grey[850],
-// //                       hintText: 'Search...',
-// //                       hintStyle: TextStyle(color: Colors.white70),
-// //                       border: OutlineInputBorder(
-// //                         borderRadius: BorderRadius.circular(30),
-// //                         borderSide: BorderSide.none,
-// //                       ),
-// //                     ),
-// //                     style: TextStyle(color: Colors.white),
-// //                   ),
-// //                 ),
-// //                 IconButton(
-// //                   icon: Icon(Icons.search, color: Colors.white),
-// //                   onPressed: () {
-// //                     _sendSearchQuery(searchController.text);
-// //                     searchController.clear();
-// //                   },
-// //                 ),
-// //               ],
-// //             ),
-// //           ),
-// //         ],
-// //       ),
-// //       bottomNavigationBar: BottomNavigationBar(
-// //         backgroundColor: Colors.black,
-// //         selectedItemColor: Colors.blue,
-// //         unselectedItemColor: Colors.white70,
-// //         items: const <BottomNavigationBarItem>[
-// //           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-// //           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
-// //           BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Library'),
-// //         ],
-// //         onTap: (index) {
-// //           if (index == 0) {
-// //             Navigator.pushReplacementNamed(context, '/home');
-// //           } else if (index == 1) {
-// //             // Already on Discover screen
-// //           } else if (index == 2) {
-// //             Navigator.pushReplacementNamed(context, '/library');
-// //           }
-// //         },
-// //       ),
-// //     );
-// //   }
-// // }
-// import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'dart:io';
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
-
-// class DiscoverScreen extends StatefulWidget {
-//   final String? initialQuery;
-
-//   DiscoverScreen({this.initialQuery});
-
-//   @override
-//   _DiscoverScreenState createState() => _DiscoverScreenState();
-// }
-
-// class _DiscoverScreenState extends State<DiscoverScreen> {
-//   bool focusEnabled = false;
-//   bool inChatMode = false;
-//   List<Map<String, String>> chatMessages = [];
-//   String sessionId = '';
-//   TextEditingController searchController = TextEditingController();
-//   List<Map<String, String>> searchResults = [];
-//   File? _image;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     // If an initial query is provided, automatically trigger the search
-//     if (widget.initialQuery != null) {
-//       _sendSearchQuery(widget.initialQuery!);
-//     }
-//   }
-
-//   Future<void> _sendSearchQuery(String query) async {
-//     setState(() {
-//       searchResults.add({'sender': 'user', 'message': query});
-//     });
-
-//     final String apiUrl = "http://10.0.2.2:5000/ask";
-
-//     try {
-//       final response = await http.post(
-//         Uri.parse(apiUrl),
-//         headers: {"Content-Type": "application/json"},
-//         body: jsonEncode({"question": query}),
-//       );
-
-//       if (response.statusCode == 200) {
-//         final jsonResponse = jsonDecode(response.body);
-//         String botResponse = jsonResponse['response'];
-
-//         setState(() {
-//           searchResults.add({'sender': 'bot', 'message': botResponse});
-//         });
-//       } else {
-//         setState(() {
-//           searchResults.add({
-//             'sender': 'bot',
-//             'message': 'Error: Unable to fetch response from server.'
-//           });
-//         });
-//       }
-//     } catch (e) {
-//       setState(() {
-//         searchResults.add({
-//           'sender': 'bot',
-//           'message': 'Error: Failed to connect to the server.'
-//         });
-//       });
-//     }
-//   }
-
-//   Future<void> _pickImage() async {
-//     final pickedFile =
-//         await ImagePicker().pickImage(source: ImageSource.gallery);
-//     if (pickedFile != null) {
-//       setState(() {
-//         _image = File(pickedFile.path);
-//         searchResults.add({'sender': 'user', 'message': '[Image uploaded]'});
-//       });
-//     }
-//   }
-
-//   void _clearChat() {
-//     setState(() {
-//       chatMessages.clear();
-//       inChatMode = false; // Return to initial state
-//     });
-//   }
-
-//   void _startNewChatSession() {
-//     setState(() {
-//       chatMessages.clear();
-//       sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-//       inChatMode = false; // Ensure starting in initial state
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Discover'),
-//         actions: [
-//           IconButton(icon: Icon(Icons.add), onPressed: _startNewChatSession),
-//           IconButton(icon: Icon(Icons.clear), onPressed: _clearChat),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: searchResults.length,
-//               itemBuilder: (context, index) {
-//                 final chat = searchResults[index];
-//                 bool isUser = chat['sender'] == 'user';
-//                 return Align(
-//                   alignment:
-//                       isUser ? Alignment.centerRight : Alignment.centerLeft,
-//                   child: Container(
-//                     margin: EdgeInsets.symmetric(vertical: 5),
-//                     padding: EdgeInsets.all(10),
-//                     decoration: BoxDecoration(
-//                       color: isUser ? Colors.blue : Colors.grey[850],
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                     child:
-//                         chat['message'] == '[Image uploaded]' && _image != null
-//                             ? Image.file(_image!)
-//                             : Text(
-//                                 chat['message']!,
-//                                 style: TextStyle(color: Colors.white),
-//                               ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Row(
-//               children: [
-//                 IconButton(
-//                   icon: Icon(Icons.image, color: Colors.white),
-//                   onPressed: _pickImage,
-//                 ),
-//                 Expanded(
-//                   child: TextField(
-//                     controller: searchController,
-//                     decoration: InputDecoration(
-//                       filled: true,
-//                       fillColor: Colors.grey[850],
-//                       hintText: 'Search...',
-//                       hintStyle: TextStyle(color: Colors.white70),
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                         borderSide: BorderSide.none,
-//                       ),
-//                     ),
-//                     style: TextStyle(color: Colors.white),
-//                   ),
-//                 ),
-//                 IconButton(
-//                   icon: Icon(Icons.send, color: Colors.white),
-//                   onPressed: () {
-//                     _sendSearchQuery(searchController.text);
-//                     searchController.clear();
-//                   },
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         backgroundColor: Colors.black,
-//         selectedItemColor: Colors.blue,
-//         unselectedItemColor: Colors.white70,
-//         items: const <BottomNavigationBarItem>[
-//           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-//           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
-//           BottomNavigationBarItem(
-//               icon: Icon(Icons.library_books), label: 'Library'),
-//         ],
-//         onTap: (index) {
-//           if (index == 0) {
-//             Navigator.pushReplacementNamed(context, '/home');
-//           } else if (index == 1) {
-//             // Already on Discover screen
-//           } else if (index == 2) {
-//             Navigator.pushReplacementNamed(context, '/library');
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }
-// import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'dart:io';
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
-
-// class DiscoverScreen extends StatefulWidget {
-//   final String? initialQuery;
-
-//   DiscoverScreen({this.initialQuery});
-
-//   @override
-//   _DiscoverScreenState createState() => _DiscoverScreenState();
-// }
-
-// class _DiscoverScreenState extends State<DiscoverScreen> {
-//   bool focusEnabled = false;
-//   bool inChatMode = false;
-//   List<Map<String, String>> chatMessages = [];
-//   String sessionId = '';
-//   TextEditingController searchController = TextEditingController();
-//   List<Map<String, String>> searchResults = [];
-//   File? _image;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     // If an initial query is provided, automatically trigger the search
-//     if (widget.initialQuery != null) {
-//       _sendSearchQuery(widget.initialQuery!);
-//     }
-//   }
-
-//   Future<void> _sendSearchQuery(String query) async {
-//     setState(() {
-//       searchResults.add({'sender': 'user', 'message': query});
-//     });
-
-//     final String apiUrl = "http://10.0.2.2:5000/ask";
-
-//     try {
-//       final response = await http.post(
-//         Uri.parse(apiUrl),
-//         headers: {"Content-Type": "application/json"},
-//         body: jsonEncode({"question": query}),
-//       );
-
-//       if (response.statusCode == 200) {
-//         final jsonResponse = jsonDecode(response.body);
-//         String botResponse = jsonResponse['response'];
-
-//         setState(() {
-//           searchResults.add({'sender': 'bot', 'message': botResponse});
-//         });
-//       } else {
-//         setState(() {
-//           searchResults.add({
-//             'sender': 'bot',
-//             'message': 'Error: Unable to fetch response from server.'
-//           });
-//         });
-//       }
-//     } catch (e) {
-//       setState(() {
-//         searchResults.add({
-//           'sender': 'bot',
-//           'message': 'Error: Failed to connect to the server.'
-//         });
-//       });
-//     }
-//   }
-
-//   Future<void> _pickImage() async {
-//     final pickedFile =
-//         await ImagePicker().pickImage(source: ImageSource.gallery);
-//     if (pickedFile != null) {
-//       setState(() {
-//         _image = File(pickedFile.path);
-//         searchResults.add({'sender': 'user', 'message': '[Image uploaded]'});
-//       });
-//     }
-//   }
-
-//   void _clearChat() {
-//     setState(() {
-//       searchResults.clear(); // Clear searchResults instead of chatMessages
-//     });
-//   }
-
-//   void _startNewChatSession() {
-//     setState(() {
-//       searchResults.clear(); // Clear searchResults to start a new session
-//       sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Discover'),
-//         actions: [
-//           IconButton(icon: Icon(Icons.add), onPressed: _startNewChatSession),
-//           IconButton(icon: Icon(Icons.clear), onPressed: _clearChat),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: searchResults.length,
-//               itemBuilder: (context, index) {
-//                 final chat = searchResults[index];
-//                 bool isUser = chat['sender'] == 'user';
-//                 return Align(
-//                   alignment:
-//                       isUser ? Alignment.centerRight : Alignment.centerLeft,
-//                   child: Container(
-//                     margin: EdgeInsets.symmetric(vertical: 5),
-//                     padding: EdgeInsets.all(10),
-//                     constraints: BoxConstraints(
-//                       maxWidth: MediaQuery.of(context).size.width * 0.7,
-//                     ),
-//                     decoration: BoxDecoration(
-//                       color: isUser ? Colors.blue : Colors.grey[850],
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                     child:
-//                         chat['message'] == '[Image uploaded]' && _image != null
-//                             ? ConstrainedBox(
-//                                 constraints: BoxConstraints(
-//                                   maxHeight: 200, // Limit the image height
-//                                 ),
-//                                 child: Image.file(
-//                                   _image!,
-//                                   fit: BoxFit.cover,
-//                                 ),
-//                               )
-//                             : Text(
-//                                 chat['message']!,
-//                                 style: TextStyle(color: Colors.white),
-//                               ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Row(
-//               children: [
-//                 IconButton(
-//                   icon: Icon(Icons.image, color: Colors.white),
-//                   onPressed: _pickImage,
-//                 ),
-//                 Expanded(
-//                   child: TextField(
-//                     controller: searchController,
-//                     decoration: InputDecoration(
-//                       filled: true,
-//                       fillColor: Colors.grey[850],
-//                       hintText: 'Search...',
-//                       hintStyle: TextStyle(color: Colors.white70),
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                         borderSide: BorderSide.none,
-//                       ),
-//                     ),
-//                     style: TextStyle(color: Colors.white),
-//                   ),
-//                 ),
-//                 IconButton(
-//                   icon: Icon(Icons.send, color: Colors.white),
-//                   onPressed: () {
-//                     _sendSearchQuery(searchController.text);
-//                     searchController.clear();
-//                   },
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         backgroundColor: Colors.black,
-//         selectedItemColor: Colors.blue,
-//         unselectedItemColor: Colors.white70,
-//         items: const <BottomNavigationBarItem>[
-//           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-//           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Discover'),
-//           BottomNavigationBarItem(
-//               icon: Icon(Icons.library_books), label: 'Library'),
-//         ],
-//         onTap: (index) {
-//           if (index == 0) {
-//             Navigator.pushReplacementNamed(context, '/home');
-//           } else if (index == 1) {
-//             // Already on Discover screen
-//           } else if (index == 2) {
-//             Navigator.pushReplacementNamed(context, '/library');
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }
-
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -568,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 class DiscoverScreen extends StatefulWidget {
   final String? initialQuery;
@@ -582,6 +20,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   bool inChatMode = false;
   List<Map<String, String>> searchResults = [];
   File? _image;
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
@@ -630,12 +69,97 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  Future<void> _pickFile() async {
+    try {
+      final option = await showModalBottomSheet<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Take a photo'),
+                onTap: () => Navigator.pop(context, 'camera'),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Choose from gallery'),
+                onTap: () => Navigator.pop(context, 'gallery'),
+              ),
+              ListTile(
+                leading: Icon(Icons.file_copy),
+                title: Text('Choose a file'),
+                onTap: () => Navigator.pop(context, 'file'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (option == null) return;
+
+      File? file;
+      final picker = ImagePicker();
+
+      switch (option) {
+        case 'camera':
+          final pickedFile = await picker.pickImage(source: ImageSource.camera);
+          if (pickedFile != null) file = File(pickedFile.path);
+          break;
+        case 'gallery':
+          final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+          if (pickedFile != null) file = File(pickedFile.path);
+          break;
+        case 'file':
+          final pickedFile = await FilePicker.platform.pickFiles(type: FileType.image);
+          if (pickedFile != null) file = File(pickedFile.files.single.path!);
+          break;
+      }
+
+      if (file != null) {
+        setState(() {
+          _image = file;
+          searchResults.add({'sender': 'user', 'message': '[Image uploaded]'});
+        });
+        await _uploadFile(file);
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    }
+  }
+
+  Future<void> _uploadFile(File file) async {
+    final String apiUrl = "http://10.0.2.2:5000/ocr"; // Update to your API endpoint
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+        ..files.add(await http.MultipartFile.fromPath('file', file.path));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = jsonDecode(responseBody);
+        String ocrText = jsonResponse['text'];
+
+        setState(() {
+          searchResults.add({'sender': 'bot', 'message': ocrText});
+        });
+      } else {
+        setState(() {
+          searchResults.add({
+            'sender': 'bot',
+            'message': 'Error: Unable to fetch response from server.'
+          });
+        });
+      }
+    } catch (e) {
       setState(() {
-        _image = File(pickedFile.path);
-        searchResults.add({'sender': 'user', 'message': '[Image uploaded]'});
+        searchResults.add({
+          'sender': 'bot',
+          'message': 'Error: Failed to connect to the server.'
+        });
       });
     }
   }
@@ -704,11 +228,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               children: [
                 IconButton(
                   icon: Icon(Icons.image, color: Colors.white),
-                  onPressed: _pickImage,
+                  onPressed: _pickFile,
                 ),
                 Expanded(
                   child: TextField(
-                    controller: TextEditingController(),
+                    controller: _textController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey[850],
@@ -725,7 +249,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 IconButton(
                   icon: Icon(Icons.send, color: Colors.white),
                   onPressed: () {
-                    _sendSearchQuery(TextEditingController().text);
+                    final query = _textController.text.trim();
+                    if (query.isNotEmpty) {
+                      _sendSearchQuery(query);
+                      _textController.clear();
+                    }
                   },
                 ),
               ],
