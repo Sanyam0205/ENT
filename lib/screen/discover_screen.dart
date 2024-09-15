@@ -34,7 +34,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       searchResults.add({'sender': 'user', 'message': query});
     });
 
-    final String apiUrl = "http://10.0.2.2:5000/ask";
+    final String apiUrl = "http://10.0.2.2:8000/ask";
 
     try {
       final response = await http.post(
@@ -118,7 +118,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   Future<void> _uploadFile(File file) async {
     final String apiUrl =
-        "http://10.0.2.2:5000/ocr"; // Update to your API endpoint
+        "http://10.0.2.2:8000/ocr"; // Update to your API endpoint
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse(apiUrl))

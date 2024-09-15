@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
 import 'package:mokshayani/screen/discover_screen.dart';
 
@@ -41,7 +41,7 @@ class _ChatbotUIState extends State<ChatbotUI> {
       inChatMode = true; // Transition to chat mode
     });
 
-    final String apiUrl = "http://10.0.2.2:5000/ask";
+    final String apiUrl = "http://10.0.2.2:8000/ask";
 
     try {
       final response = await http.post(
@@ -76,13 +76,45 @@ class _ChatbotUIState extends State<ChatbotUI> {
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
     if (result != null) {
       setState(() {
         selectedFile = result.files.single.name;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('File selected: ${result.files.single.name}')),
+      );
+      await _uploadPDF(result.files.single);
+    }
+  }
+
+  Future<void> _uploadPDF(PlatformFile file) async {
+    final String apiUrl = "http://10.0.2.2:8000/upload_pdf";
+
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        file.path!,
+        contentType: MediaType('application', 'pdf'),
+      ));
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF uploaded successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload PDF')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading PDF: $e')),
       );
     }
   }
